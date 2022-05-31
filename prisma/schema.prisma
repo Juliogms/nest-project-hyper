@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model alunos {
+  id         Int      @id @default(autoincrement()) @db.UnsignedInt
+  nome       String   @db.VarChar(127)
+  cpf        String   @db.Char(11)
+  cidade     String   @db.VarChar(32)
+  telefone   String   @db.Char(11)
+  planoId    Int
+  contratoId Int
+  servicosId Int
+  filialId   Int
+  userId     Int      @db.UnsignedInt
+  contrato   contrato @relation(fields: [contratoId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_alunos_contrato")
+  filiais    filiais  @relation(fields: [filialId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_alunos_filiais")
+  planos     planos   @relation(fields: [planoId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_alunos_planos")
+  servicos   servicos @relation(fields: [servicosId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_alunos_servicos")
+  users      users    @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_alunos_users")
+
+  @@index([contratoId], map: "FK_alunos_contrato")
+  @@index([filialId], map: "FK_alunos_filiais")
+  @@index([planoId], map: "FK_alunos_planos")
+  @@index([servicosId], map: "FK_alunos_servicos")
+  @@index([userId], map: "FK_alunos_users")
+}
+
+model contrato {
+  id     Int      @id @default(autoincrement())
+  nome   String   @db.VarChar(9)
+  alunos alunos[]
+}
+
+model filiais {
+  id           Int            @id @default(autoincrement())
+  nome         String         @db.VarChar(9)
+  alunos       alunos[]
+  funcionarios funcionarios[]
+}
+
+model funcionarios {
+  id       Int     @id @default(autoincrement())
+  nome     String  @db.VarChar(127)
+  cpf      String  @db.Char(11)
+  funcao   String  @db.VarChar(127)
+  telefone String  @db.Char(11)
+  turno    String  @db.VarChar(8)
+  filialId Int
+  filiais  filiais @relation(fields: [filialId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_funcionarios_filiais")
+
+  @@index([filialId], map: "FK_funcionarios_filiais")
+}
+
+model planos {
+  id     Int      @id @default(autoincrement())
+  nome   String   @db.VarChar(7)
+  alunos alunos[]
+}
+
+model servicos {
+  id     Int      @id @default(autoincrement())
+  nome   String   @db.VarChar(127)
+  alunos alunos[]
+}
+
+model users {
+  id     Int      @id @default(autoincrement()) @db.UnsignedInt
+  email  String   @unique @db.VarChar(127)
+  senha  String   @db.VarChar(127)
+  alunos alunos[]
+}
